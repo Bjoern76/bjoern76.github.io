@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favicon test</title>
+  <link rel="icon" href="icons/favicon.svg" sizes="any" type="image/svg+xml">
+  <link rel="icon" href="icons/favicon_16.png" sizes="16x16">
+  <link rel="icon" href="icons/favicon_32.png" sizes="32x32">
+  <link rel="icon" href="icons/favicon_64.png" sizes="64x64">
+  <link rel="icon" href="icons/favicon_128.png" sizes="128x128">
+  <link rel="icon" href="icons/favicon.ico" sizes="16x16 32x32 192x192">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #f5f5f4;
+      --surface:  #ffffff;
+      --border:   #e2e0dc;
+      --text:     #111827;
+      --muted:    #6b7280;
+      --accent:   #2563eb;
+      --accent-h: #1d4ed8;
+      --radius:   10px;
+      --mono:     "Fira Code", "Cascadia Code", ui-monospace, monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:      #111827;
+        --surface: #1f2937;
+        --border:  #374151;
+        --text:    #f9fafb;
+        --muted:   #9ca3af;
+        --accent:  #3b82f6;
+        --accent-h:#2563eb;
+      }
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1rem;
+      gap: 2rem;
+    }
+
+    header {
+      text-align: center;
+      max-width: 480px;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.4rem;
+    }
+
+    header p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .section {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .section-title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 500;
+      font-family: var(--mono);
+    }
+
+    .card-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .link-list {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .link-list a {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.12s;
+    }
+
+    .link-list a:last-child { border-bottom: none; }
+    .link-list a:hover { background: var(--bg); color: var(--accent-h); }
+
+    .link-list a::after {
+      content: "↗";
+      font-size: 0.75rem;
+      opacity: 0.5;
+      margin-left: auto;
+    }
+
+    .link-group-label {
+      display: block;
+      padding: 0.5rem 1rem 0.35rem;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    hr.divider {
+      width: 100%;
+      max-width: 680px;
+      border: none;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Favicon test</h1>
+    <p>Testing different favicon formats, sizes, and theme variants.</p>
+  </header>
+
+  <div class="section">
+    <span class="section-title">Icon files</span>
+    <div class="cards">
+
+      <div class="card">
+        <span class="card-title">favicon.ico</span>
+        <span class="card-desc">Contains three sizes: 16×16, 32×32, and 192×192. Each frame shows its size as text.</span>
+      </div>
+
+      <div class="card">
+        <span class="card-title">favicon_16.png</span>
+        <span class="card-desc">16×16 PNG.</span>
+      </div>
+
+      <div class="card">
+        <span class="card-title">favicon_32.png</span>
+        <span class="card-desc">32×32 PNG. Shows size prefixed with "P".</span>
+      </div>
+
+      <div class="card">
+        <span class="card-title">favicon_64.png</span>
+        <span class="card-desc">64×64 PNG. Shows size prefixed with "P".</span>
+      </div>
+
+      <div class="card">
+        <span class="card-title">favicon_128.png</span>
+        <span class="card-desc">128×128 PNG. Shows size prefixed with "P".</span>
+      </div>
+
+      <div class="card">
+        <span class="card-title">favicon.svg</span>
+        <span class="card-desc">SVG favicon showing the text "svg".</span>
+      </div>
+
+      <div class="card">
+        <span class="card-title">favicon_lightdark.svg</span>
+        <span class="card-desc">SVG showing "svg" on a white or dark background depending on <code>prefers-color-scheme</code>.</span>
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section">
+    <span class="section-title">Demos</span>
+    <div class="link-list">
+      <a href="dataurl/favicon-demo.html">Favicon setter — set favicons via data URL as SVG or rendered PNG</a>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section">
+    <span class="section-title">References</span>
+    <div class="link-list">
+
+      <span class="link-group-label">Specification &amp; browser support</span>
+      <a href="https://html.spec.whatwg.org/dev/links.html#rel-icon" target="_blank">HTML Standard — Link type "icon"</a>
+      <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel#icon" target="_blank">MDN — rel=icon (sizes, type attributes)</a>
+      <a href="https://caniuse.com/link-icon-svg" target="_blank">Can I use — SVG favicons</a>
+
+      <span class="link-group-label">Guides &amp; generators</span>
+      <a href="https://evilmartians.com/chronicles/how-to-favicon-in-2021-six-files-that-fit-most-needs" target="_blank">How to Favicon in 2024 — Evil Martians</a>
+      <a href="https://favicon.io" target="_blank">favicon.io — favicon generator</a>
+      <a href="https://realfavicongenerator.net" target="_blank">realfavicongenerator.net — complete favicon sets</a>
+
+      <span class="link-group-label">Dynamic favicons</span>
+      <a href="https://css-tricks.com/dynamic-favicons/" target="_blank">Dynamic favicons via Canvas — CSS-Tricks</a>
+      <a href="https://github.com/lipka/piecon" target="_blank">Piecon — pie chart progress badges</a>
+      <a href="https://github.com/nicholasgasior/favicon-badge" target="_blank">favicon-badge — notification badge via Canvas</a>
+      <a href="https://favicon.im/blog/animated-favicon-live-demo" target="_blank">Animated favicons (with live demo)</a>
+
+      <span class="link-group-label">Curiosities</span>
+      <a href="https://vidferris.github.io/FaviconDoom/favicondoom.html" target="_blank">Favicon DOOM</a>
+      <a href="https://www.timwehrle.de/labs/favicon-site" target="_blank">Website inside a favicon</a>
+
+    </div>
+  </div>
+
+</body>
+</html>

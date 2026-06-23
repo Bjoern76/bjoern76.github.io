@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favicon Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #f5f5f4;
+      --surface:  #ffffff;
+      --border:   #e2e0dc;
+      --text:     #111827;
+      --muted:    #6b7280;
+      --accent:   #2563eb;
+      --accent-h: #1d4ed8;
+      --radius:   10px;
+      --mono:     "Fira Code", "Cascadia Code", ui-monospace, monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:      #111827;
+        --surface: #1f2937;
+        --border:  #374151;
+        --text:    #f9fafb;
+        --muted:   #9ca3af;
+        --accent:  #3b82f6;
+        --accent-h:#2563eb;
+      }
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1rem;
+      gap: 2rem;
+    }
+
+    header {
+      text-align: center;
+      max-width: 480px;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.4rem;
+    }
+
+    header p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      width: 100%;
+      max-width: 680px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .card-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .card-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    button {
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 500;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 0.9rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      align-self: flex-start;
+    }
+
+    button:hover  { background: var(--accent-h); }
+    button:active { opacity: 0.85; }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    .status-bar {
+      width: 100%;
+      max-width: 680px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--muted);
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+
+    .status-dot.ok   { background: #22c55e; }
+    .status-dot.err  { background: #ef4444; }
+    .status-dot.busy { background: #f59e0b; }
+
+    .status-text {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .divider {
+      width: 100%;
+      max-width: 680px;
+      border: none;
+      border-top: 1px solid var(--border);
+    }
+
+    .preview-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      width: 100%;
+      max-width: 680px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+    }
+
+    .preview-row canvas {
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      image-rendering: pixelated;
+    }
+
+    .preview-info {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .preview-info strong {
+      color: var(--text);
+      font-weight: 500;
+      display: block;
+      margin-bottom: 0.15rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Favicon setter</h1>
+    <p>Sets the SVG favicon via data URL — either as a native SVG or as a rendered PNG variant.</p>
+  </header>
+
+  <div class="cards">
+
+    <div class="card">
+      <span class="card-label">SVG</span>
+      <span class="card-title">SVG · auto theme</span>
+      <span class="card-desc">Direct SVG data URL. The browser resolves the theme natively via <code>prefers-color-scheme</code>.</span>
+      <button onclick="runSVG()">Apply</button>
+    </div>
+
+    <div class="card">
+      <span class="card-label">PNG</span>
+      <span class="card-title">PNG · auto theme</span>
+      <span class="card-desc">Renders the SVG onto a canvas, reads the system theme, and produces a matching PNG.</span>
+      <button onclick="runPNG('auto')">Apply</button>
+    </div>
+
+    <div class="card">
+      <span class="card-label">PNG</span>
+      <span class="card-title">PNG · force light</span>
+      <span class="card-desc">PNG in light theme — regardless of the current system setting.</span>
+      <button onclick="runPNG('light')">Apply</button>
+    </div>
+
+    <div class="card">
+      <span class="card-label">PNG</span>
+      <span class="card-title">PNG · force dark</span>
+      <span class="card-desc">PNG in dark theme — regardless of the current system setting.</span>
+      <button onclick="runPNG('dark')">Apply</button>
+    </div>
+
+    <div class="card">
+      <span class="card-label">PNG</span>
+      <span class="card-title">PNG · 64 px</span>
+      <span class="card-desc">Same as auto, but at double resolution (64 × 64 px) for HiDPI displays.</span>
+      <button onclick="runPNG('auto', 64)">Apply</button>
+    </div>
+
+  </div>
+
+  <div class="status-bar">
+    <span class="status-dot" id="dot"></span>
+    <span class="status-text" id="status">Ready — choose a variant.</span>
+  </div>
+
+  <hr class="divider">
+
+  <div class="preview-row">
+    <canvas id="preview" width="64" height="64" title="PNG preview"></canvas>
+    <div class="preview-info">
+      <strong id="preview-label">No PNG preview yet</strong>
+      Shows the most recently rendered PNG. The tab favicon may only update after the next focus change, depending on the browser.
+    </div>
+  </div>
+
+  <script src="set-favicon.js"></script>
+  <script>
+    const dot    = document.getElementById("dot");
+    const status = document.getElementById("status");
+    const canvas = document.getElementById("preview");
+    const label  = document.getElementById("preview-label");
+
+    function setStatus(state, msg) {
+      dot.className = "status-dot " + state;
+      status.textContent = msg;
+    }
+
+    function runSVG() {
+      setFaviconSVG();
+      setStatus("ok", "SVG favicon applied (auto theme via CSS).");
+      label.textContent = "No PNG — SVG variant active.";
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, 64, 64);
+    }
+
+    function runPNG(theme, size = 32) {
+      setStatus("busy", `Rendering PNG (theme: ${theme}, ${size} px) …`);
+      setFaviconPNG(size, theme)
+        .then(() => {
+          const link = document.querySelector("link[rel~='icon']");
+          const img  = new Image();
+          img.onload = () => {
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, 64, 64);
+            ctx.drawImage(img, 0, 0, 64, 64);
+            label.textContent = `PNG · ${theme} theme · ${size} × ${size} px`;
+          };
+          img.src = link.href;
+          setStatus("ok", `PNG favicon applied (theme: ${theme}, ${size} × ${size} px).`);
+        })
+        .catch(err => {
+          setStatus("err", "Render error: " + err.message);
+        });
+    }
+  </script>
+
+</body>
+</html>
