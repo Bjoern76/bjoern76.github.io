@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favicon type fallback</title>
+  <link rel="icon" href="icons/favicon.svg"    type="image/svg+xml">
+  <link rel="icon" href="icons/favicon_32.png" type="image/png" sizes="32x32">
+  <link rel="icon" href="icons/favicon.ico"    type="image/x-icon">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f5f5f4; --surface: #ffffff; --border: #e2e0dc;
+      --text: #111827; --muted: #6b7280; --accent: #2563eb;
+      --radius: 10px; --mono: "Fira Code", "Cascadia Code", ui-monospace, monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #111827; --surface: #1f2937; --border: #374151; --text: #f9fafb; --muted: #9ca3af; --accent: #3b82f6; }
+    }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 3rem 1rem; gap: 2rem; }
+    header { text-align: center; max-width: 480px; }
+    header h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+    header p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+    .section { width: 100%; max-width: 680px; display: flex; flex-direction: column; gap: 0.75rem; }
+    .section-title { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
+    .row { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0; border-bottom: 1px solid var(--border); }
+    .row:last-child { border-bottom: none; }
+    .row-num { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); min-width: 1.5rem; }
+    .row-type { font-family: var(--mono); font-size: 0.82rem; min-width: 180px; }
+    .row-file { font-size: 0.82rem; color: var(--muted); flex: 1; }
+    .badge { display: inline-block; font-size: 0.68rem; font-weight: 600; padding: 0.15rem 0.45rem; border-radius: 4px; white-space: nowrap; }
+    .badge-yes  { background: #dcfce7; color: #15803d; }
+    .badge-no   { background: #fee2e2; color: #b91c1c; }
+    .badge-unk  { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+    @media (prefers-color-scheme: dark) {
+      .badge-yes { background: #14532d; color: #86efac; }
+      .badge-no  { background: #450a0a; color: #fca5a5; }
+    }
+    .note { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+    a.back { font-size: 0.82rem; color: var(--accent); text-decoration: none; align-self: flex-start; }
+    a.back:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Favicon type fallback</h1>
+    <p>Three <code>&lt;link rel="icon"&gt;</code> in priority order: SVG → PNG → ICO. Tests whether the browser respects <code>type</code> and falls back correctly.</p>
+  </header>
+
+  <div class="section">
+    <span class="section-title">Priority order &amp; format support</span>
+    <div class="card" id="table"></div>
+  </div>
+
+  <div class="section">
+    <span class="section-title">Detection method</span>
+    <div class="card">
+      <span class="note">SVG support is probed by creating a test <code>&lt;img&gt;</code> with an inline SVG data URL. PNG and ICO support are assumed for all modern browsers. The browser should pick the first format it supports — check the network tab to confirm which file was actually requested.</span>
+    </div>
+  </div>
+
+  <a class="back" href="index.html">← Back to index</a>
+
+  <script>
+    const formats = [
+      { type: 'image/svg+xml', file: 'icons/favicon.svg',    label: 'SVG' },
+      { type: 'image/png',     file: 'icons/favicon_32.png', label: 'PNG' },
+      { type: 'image/x-icon',  file: 'icons/favicon.ico',    label: 'ICO' },
+    ];
+
+    const table = document.getElementById('table');
+
+    function renderRow(f, i, supported) {
+      const badge = supported === true  ? `<span class="badge badge-yes">supported</span>`
+                  : supported === false ? `<span class="badge badge-no">not supported</span>`
+                  :                       `<span class="badge badge-unk">unknown</span>`;
+      table.innerHTML += `
+        <div class="row">
+          <span class="row-num">${i + 1}</span>
+          <span class="row-type">${f.type}</span>
+          <span class="row-file">${f.file}</span>
+          ${badge}
+        </div>`;
+    }
+
+    // SVG: test via Image load
+    const svgData = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"></svg>';
+    const img = new Image();
+    img.onload  = () => { renderRow(formats[0], 0, true);  renderRow(formats[1], 1, true); renderRow(formats[2], 2, true); };
+    img.onerror = () => { renderRow(formats[0], 0, false); renderRow(formats[1], 1, true); renderRow(formats[2], 2, true); };
+    img.src = svgData;
+  </script>
+</body>
+</html>

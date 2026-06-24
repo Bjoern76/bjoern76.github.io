@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PWA Manifest demo</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="../icons/favicon.svg" sizes="any" type="image/svg+xml">
+  <link rel="icon" href="../icons/favicon_32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+  <meta name="theme-color" content="#2563eb">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f5f5f4; --surface: #ffffff; --border: #e2e0dc;
+      --text: #111827; --muted: #6b7280; --accent: #2563eb; --accent-h: #1d4ed8;
+      --radius: 10px; --mono: "Fira Code", "Cascadia Code", ui-monospace, monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #111827; --surface: #1f2937; --border: #374151; --text: #f9fafb; --muted: #9ca3af; --accent: #3b82f6; --accent-h: #2563eb; }
+    }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 3rem 1rem; gap: 2rem; }
+    header { text-align: center; max-width: 480px; }
+    header h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+    header p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+    .section { width: 100%; max-width: 680px; display: flex; flex-direction: column; gap: 0.75rem; }
+    .section-title { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .row { display: flex; align-items: baseline; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+    .row:last-child { border-bottom: none; }
+    .row-label { font-size: 0.82rem; color: var(--muted); min-width: 200px; flex-shrink: 0; }
+    .row-value { font-family: var(--mono); font-size: 0.82rem; word-break: break-all; }
+    .badge { display: inline-block; font-size: 0.68rem; font-weight: 600; padding: 0.15rem 0.45rem; border-radius: 4px; }
+    .badge-yes { background: #dcfce7; color: #15803d; }
+    .badge-no  { background: #fee2e2; color: #b91c1c; }
+    .badge-unk { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+    @media (prefers-color-scheme: dark) {
+      .badge-yes { background: #14532d; color: #86efac; }
+      .badge-no  { background: #450a0a; color: #fca5a5; }
+    }
+    .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.75rem; }
+    .icon-tile { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.75rem; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
+    .icon-tile img { border-radius: 6px; border: 1px solid var(--border); image-rendering: pixelated; }
+    .icon-tile-label { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); text-align: center; }
+    button { font-family: inherit; font-size: 0.85rem; font-weight: 500; background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 0.5rem 0.9rem; cursor: pointer; transition: background 0.15s; align-self: flex-start; }
+    button:hover { background: var(--accent-h); }
+    .note { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+    a.back { font-size: 0.82rem; color: var(--accent); text-decoration: none; align-self: flex-start; }
+    a.back:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>PWA Manifest demo</h1>
+    <p>Tests Web App Manifest support and installability. Includes <code>manifest.json</code> with icons at 192×192 and 512×512.</p>
+  </header>
+
+  <div class="section">
+    <span class="section-title">Manifest &amp; PWA support</span>
+    <div class="card">
+      <div class="row"><span class="row-label">Manifest linked</span><span class="row-value" id="manifest-linked">—</span></div>
+      <div class="row"><span class="row-label">Manifest fetchable</span><span class="row-value" id="manifest-fetch">—</span></div>
+      <div class="row"><span class="row-label">beforeinstallprompt fired</span><span class="row-value" id="install-prompt">waiting…</span></div>
+      <div class="row"><span class="row-label">serviceWorker supported</span><span class="row-value" id="sw-support">—</span></div>
+      <div class="row"><span class="row-label">Running as standalone</span><span class="row-value" id="standalone">—</span></div>
+      <div class="row"><span class="row-label">theme-color meta</span><span class="row-value" id="theme-color">—</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="section-title">Manifest contents</span>
+    <div class="card" id="manifest-card">
+      <span class="note" id="manifest-status">Fetching manifest.json…</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="section-title">Manifest icons</span>
+    <div class="icon-grid" id="icon-grid">
+      <span class="note" style="grid-column:1/-1">Loading…</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="section-title">Install</span>
+    <div class="card">
+      <span class="note">On supported browsers (Chrome, Edge on Android/desktop) an install prompt appears automatically when criteria are met. Click the button below to trigger it if it was already captured.</span>
+      <button id="btn-install" disabled>Install app</button>
+    </div>
+  </div>
+
+  <a class="back" href="../index.html">← Back to index</a>
+
+  <script>
+    // Manifest linked
+    const manifestLink = document.querySelector('link[rel="manifest"]');
+    document.getElementById('manifest-linked').innerHTML =
+      manifestLink ? `<span class="badge badge-yes">yes</span> ${manifestLink.href}` : '<span class="badge badge-no">no</span>';
+
+    // SW support
+    document.getElementById('sw-support').innerHTML =
+      'serviceWorker' in navigator ? '<span class="badge badge-yes">yes</span>' : '<span class="badge badge-no">no</span>';
+
+    // Standalone
+    const standalone = window.navigator.standalone === true
+      || window.matchMedia('(display-mode: standalone)').matches;
+    document.getElementById('standalone').innerHTML =
+      standalone ? '<span class="badge badge-yes">yes</span>' : '<span class="badge badge-no">no</span>';
+
+    // theme-color
+    const tc = document.querySelector('meta[name="theme-color"]');
+    document.getElementById('theme-color').textContent = tc ? tc.content : '—';
+
+    // Install prompt
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('install-prompt').innerHTML = '<span class="badge badge-yes">yes — prompt captured</span>';
+      document.getElementById('btn-install').disabled = false;
+    });
+
+    document.getElementById('btn-install').onclick = () => {
+      if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; }
+    };
+
+    // Fetch and display manifest
+    fetch('manifest.json')
+      .then(r => r.json())
+      .then(m => {
+        document.getElementById('manifest-fetch').innerHTML = '<span class="badge badge-yes">yes</span>';
+        const card = document.getElementById('manifest-card');
+        card.innerHTML = '';
+        const fields = ['name','short_name','description','start_url','display','background_color','theme_color'];
+        fields.forEach(f => {
+          if (m[f] !== undefined) {
+            card.innerHTML += `<div class="row"><span class="row-label">${f}</span><span class="row-value">${m[f]}</span></div>`;
+          }
+        });
+
+        // Icons grid
+        const grid = document.getElementById('icon-grid');
+        grid.innerHTML = '';
+        m.icons.forEach(icon => {
+          grid.innerHTML += `
+            <div class="icon-tile">
+              <img src="${icon.src}" width="64" height="64" alt="${icon.sizes}">
+              <span class="icon-tile-label">${icon.sizes}<br>${icon.purpose || 'any'}</span>
+            </div>`;
+        });
+      })
+      .catch(err => {
+        document.getElementById('manifest-fetch').innerHTML = '<span class="badge badge-no">no</span>';
+        document.getElementById('manifest-status').textContent = 'Could not fetch manifest.json: ' + err.message;
+      });
+  </script>
+</body>
+</html>

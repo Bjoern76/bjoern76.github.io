@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favicon sizes priority</title>
+  <link rel="icon" href="icons/favicon_16.png"  sizes="16x16"   type="image/png">
+  <link rel="icon" href="icons/favicon_32.png"  sizes="32x32"   type="image/png">
+  <link rel="icon" href="icons/favicon_64.png"  sizes="64x64"   type="image/png">
+  <link rel="icon" href="icons/favicon_128.png" sizes="128x128" type="image/png">
+  <link rel="icon" href="icons/favicon.ico"     sizes="16x16 32x32 192x192" type="image/x-icon">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f5f5f4; --surface: #ffffff; --border: #e2e0dc;
+      --text: #111827; --muted: #6b7280; --accent: #2563eb;
+      --radius: 10px; --mono: "Fira Code", "Cascadia Code", ui-monospace, monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #111827; --surface: #1f2937; --border: #374151; --text: #f9fafb; --muted: #9ca3af; --accent: #3b82f6; }
+    }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 3rem 1rem; gap: 2rem; }
+    header { text-align: center; max-width: 480px; }
+    header h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+    header p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+    .section { width: 100%; max-width: 680px; display: flex; flex-direction: column; gap: 0.75rem; }
+    .section-title { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; }
+    .icon-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.6rem; }
+    .icon-card img { image-rendering: pixelated; border: 1px solid var(--border); border-radius: 4px; }
+    .icon-label { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); text-align: center; }
+    .icon-size { font-size: 0.72rem; color: var(--muted); }
+    .row { display: flex; align-items: baseline; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+    .row:last-child { border-bottom: none; }
+    .row-label { font-size: 0.82rem; color: var(--muted); min-width: 160px; }
+    .row-value { font-family: var(--mono); font-size: 0.82rem; }
+    .note { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+    a.back { font-size: 0.82rem; color: var(--accent); text-decoration: none; align-self: flex-start; }
+    a.back:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Favicon sizes priority</h1>
+    <p>Multiple <code>&lt;link rel="icon"&gt;</code> with explicit <code>sizes</code> attributes. Each PNG shows its own size. Check which one the browser picks in the network tab.</p>
+  </header>
+
+  <div class="section">
+    <span class="section-title">Available icons</span>
+    <div class="grid">
+      <div class="icon-card">
+        <img src="icons/favicon_16.png"  width="64" height="64" alt="16x16">
+        <span class="icon-label">favicon_16.png</span>
+        <span class="icon-size">sizes="16x16"</span>
+      </div>
+      <div class="icon-card">
+        <img src="icons/favicon_32.png"  width="64" height="64" alt="32x32">
+        <span class="icon-label">favicon_32.png</span>
+        <span class="icon-size">sizes="32x32"</span>
+      </div>
+      <div class="icon-card">
+        <img src="icons/favicon_64.png"  width="64" height="64" alt="64x64">
+        <span class="icon-label">favicon_64.png</span>
+        <span class="icon-size">sizes="64x64"</span>
+      </div>
+      <div class="icon-card">
+        <img src="icons/favicon_128.png" width="64" height="64" alt="128x128">
+        <span class="icon-label">favicon_128.png</span>
+        <span class="icon-size">sizes="128x128"</span>
+      </div>
+      <div class="icon-card">
+        <img src="icons/favicon.ico" width="64" height="64" alt="ICO">
+        <span class="icon-label">favicon.ico</span>
+        <span class="icon-size">sizes="16x16 32x32 192x192"</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="section-title">Display environment</span>
+    <div class="card">
+      <div class="row"><span class="row-label">devicePixelRatio</span><span class="row-value" id="dpr">—</span></div>
+      <div class="row"><span class="row-label">Logical resolution</span><span class="row-value" id="res">—</span></div>
+      <div class="row"><span class="row-label">Expected favicon size</span><span class="row-value" id="expected">—</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="section-title">Notes</span>
+    <div class="card">
+      <span class="note">The browser chooses the icon closest to its required size, scaled by <code>devicePixelRatio</code>. On a 2× display requesting a 32 px icon, it will prefer the 64 px PNG. Each PNG here shows its actual pixel size as text — if the tab icon shows "P32", the browser picked the 32 px file.</span>
+    </div>
+  </div>
+
+  <a class="back" href="index.html">← Back to index</a>
+
+  <script>
+    const dpr = window.devicePixelRatio || 1;
+    document.getElementById('dpr').textContent = dpr;
+    document.getElementById('res').textContent = `${screen.width}×${screen.height} (logical)`;
+    const base = 32;
+    const needed = Math.round(base * dpr);
+    const available = [16, 32, 64, 128];
+    const best = available.find(s => s >= needed) || available[available.length - 1];
+    document.getElementById('expected').textContent = `~${needed} px logical → likely picks ${best} px PNG`;
+  </script>
+</body>
+</html>

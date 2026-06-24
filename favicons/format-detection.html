@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favicon format detection</title>
+  <link rel="icon" href="icons/favicon.svg" sizes="any" type="image/svg+xml">
+  <link rel="icon" href="icons/favicon_32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="icons/favicon_16.png" sizes="16x16" type="image/png">
+  <link rel="icon" href="icons/favicon.ico" sizes="16x16 32x32 192x192" type="image/x-icon">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f5f5f4; --surface: #ffffff; --border: #e2e0dc;
+      --text: #111827; --muted: #6b7280; --accent: #2563eb;
+      --radius: 10px; --mono: "Fira Code", "Cascadia Code", ui-monospace, monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #111827; --surface: #1f2937; --border: #374151; --text: #f9fafb; --muted: #9ca3af; --accent: #3b82f6; }
+    }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 3rem 1rem; gap: 2rem; }
+    header { text-align: center; max-width: 480px; }
+    header h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+    header p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+    .section { width: 100%; max-width: 680px; display: flex; flex-direction: column; gap: 0.75rem; }
+    .section-title { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .row { display: flex; align-items: baseline; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+    .row:last-child { border-bottom: none; }
+    .row-label { font-size: 0.82rem; color: var(--muted); min-width: 140px; }
+    .row-value { font-family: var(--mono); font-size: 0.82rem; color: var(--text); word-break: break-all; }
+    .badge { display: inline-block; font-size: 0.7rem; font-weight: 600; padding: 0.15rem 0.45rem; border-radius: 4px; margin-left: 0.5rem; }
+    .badge-active { background: #dcfce7; color: #15803d; }
+    .badge-inactive { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+    @media (prefers-color-scheme: dark) {
+      .badge-active { background: #14532d; color: #86efac; }
+    }
+    a.back { font-size: 0.82rem; color: var(--accent); text-decoration: none; align-self: flex-start; }
+    a.back:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Favicon format detection</h1>
+    <p>Shows which favicon <code>&lt;link&gt;</code> tags are present and attempts to detect which one the browser selected.</p>
+  </header>
+
+  <div class="section">
+    <span class="section-title">Declared favicon links</span>
+    <div class="card" id="link-table"></div>
+  </div>
+
+  <div class="section">
+    <span class="section-title">Notes</span>
+    <div class="card">
+      <span style="font-size:0.85rem;color:var(--muted);line-height:1.6;">
+        Browsers do not expose which favicon they actually loaded. The "active" badge marks the link the browser is most likely to use based on format preference order: SVG (if supported) → largest matching PNG → ICO. Check your browser's network tab for the actual request.
+      </span>
+    </div>
+  </div>
+
+  <a class="back" href="index.html">← Back to index</a>
+
+  <script>
+    const links = Array.from(document.querySelectorAll('link[rel~="icon"]'));
+    const svgSupported = document.createElement('canvas').getContext !== undefined;
+
+    // Heuristic: browser prefers SVG if supported, else largest PNG, else ICO
+    let likelyIndex = -1;
+    for (let i = 0; i < links.length; i++) {
+      if (links[i].type === 'image/svg+xml') { likelyIndex = i; break; }
+    }
+    if (likelyIndex === -1) {
+      // pick largest PNG by sizes attribute
+      let maxSize = 0;
+      links.forEach((l, i) => {
+        if (l.type === 'image/png') {
+          const s = parseInt(l.sizes?.value?.split('x')[0] || '0');
+          if (s > maxSize) { maxSize = s; likelyIndex = i; }
+        }
+      });
+    }
+    if (likelyIndex === -1) likelyIndex = links.length - 1;
+
+    const table = document.getElementById('link-table');
+    links.forEach((l, i) => {
+      const isLikely = i === likelyIndex;
+      table.innerHTML += `
+        <div class="row">
+          <span class="row-label">${l.getAttribute('type') || '(no type)'}</span>
+          <span class="row-value">
+            ${l.getAttribute('href')}
+            <span class="badge ${isLikely ? 'badge-active' : 'badge-inactive'}">${isLikely ? 'likely active' : `sizes: ${l.getAttribute('sizes') || '—'}`}</span>
+          </span>
+        </div>`;
+    });
+  </script>
+</body>
+</html>

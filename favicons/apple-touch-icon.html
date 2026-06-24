@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apple Touch Icon</title>
+  <link rel="icon" href="icons/favicon.svg" sizes="any" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f5f5f4; --surface: #ffffff; --border: #e2e0dc;
+      --text: #111827; --muted: #6b7280; --accent: #2563eb;
+      --radius: 10px; --mono: "Fira Code", "Cascadia Code", ui-monospace, monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #111827; --surface: #1f2937; --border: #374151; --text: #f9fafb; --muted: #9ca3af; --accent: #3b82f6; }
+    }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 3rem 1rem; gap: 2rem; }
+    header { text-align: center; max-width: 480px; }
+    header h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+    header p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+    .section { width: 100%; max-width: 680px; display: flex; flex-direction: column; gap: 0.75rem; }
+    .section-title { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .preview-row { display: flex; align-items: center; gap: 1.25rem; }
+    .preview-row img { border: 1px solid var(--border); border-radius: 22%; width: 90px; height: 90px; }
+    .preview-label { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+    .row { display: flex; align-items: baseline; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+    .row:last-child { border-bottom: none; }
+    .row-label { font-size: 0.82rem; color: var(--muted); min-width: 180px; }
+    .row-value { font-family: var(--mono); font-size: 0.82rem; }
+    .note { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+    a.back { font-size: 0.82rem; color: var(--accent); text-decoration: none; align-self: flex-start; }
+    a.back:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Apple Touch Icon</h1>
+    <p>Tests <code>&lt;link rel="apple-touch-icon"&gt;</code> — the icon used when saving a page to the iOS/iPadOS home screen.</p>
+  </header>
+
+  <div class="section">
+    <span class="section-title">Icon preview</span>
+    <div class="card">
+      <div class="preview-row">
+        <img src="icons/apple-touch-icon.png" alt="Apple Touch Icon">
+        <div class="preview-label">
+          <code>apple-touch-icon.png</code><br>
+          180×180 px — shown with iOS-style rounded corners.<br>
+          iOS applies its own corner radius and gloss; no need to pre-round the image.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="section-title">Environment</span>
+    <div class="card">
+      <div class="row"><span class="row-label">User agent</span><span class="row-value" id="ua" style="word-break:break-all;font-size:0.72rem;">—</span></div>
+      <div class="row"><span class="row-label">Likely iOS/Safari</span><span class="row-value" id="is-ios">—</span></div>
+      <div class="row"><span class="row-label">Standalone mode</span><span class="row-value" id="standalone">—</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="section-title">How to test</span>
+    <div class="card">
+      <span class="note">On iOS or iPadOS, open this page in Safari, tap the Share button, and choose "Add to Home Screen". The icon that appears on your home screen should be the 180×180 PNG above. On Android and desktop browsers this link type is generally ignored in favour of the Web App Manifest.</span>
+    </div>
+  </div>
+
+  <a class="back" href="index.html">← Back to index</a>
+
+  <script>
+    document.getElementById('ua').textContent = navigator.userAgent;
+    const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent);
+    document.getElementById('is-ios').textContent = isIOS ? 'yes' : 'no';
+    const standalone = window.navigator.standalone === true
+      || window.matchMedia('(display-mode: standalone)').matches;
+    document.getElementById('standalone').textContent = standalone ? 'yes (running as installed app)' : 'no (running in browser)';
+  </script>
+</body>
+</html>

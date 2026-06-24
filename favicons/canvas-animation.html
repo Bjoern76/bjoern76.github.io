@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canvas favicon animation</title>
+  <link rel="icon" href="icons/favicon_32.png" sizes="32x32" type="image/png">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f5f5f4; --surface: #ffffff; --border: #e2e0dc;
+      --text: #111827; --muted: #6b7280; --accent: #2563eb; --accent-h: #1d4ed8;
+      --radius: 10px; --mono: "Fira Code", "Cascadia Code", ui-monospace, monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #111827; --surface: #1f2937; --border: #374151; --text: #f9fafb; --muted: #9ca3af; --accent: #3b82f6; --accent-h: #2563eb; }
+    }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 3rem 1rem; gap: 2rem; }
+    header { text-align: center; max-width: 480px; }
+    header h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+    header p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+    .section { width: 100%; max-width: 680px; display: flex; flex-direction: column; gap: 0.75rem; }
+    .section-title { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .controls { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    button { font-family: inherit; font-size: 0.85rem; font-weight: 500; background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 0.5rem 0.9rem; cursor: pointer; transition: background 0.15s; }
+    button:hover { background: var(--accent-h); }
+    button.secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    button.secondary:hover { background: var(--bg); }
+    .preview-row { display: flex; align-items: center; gap: 1.25rem; }
+    .preview-row canvas { border: 1px solid var(--border); border-radius: 6px; image-rendering: pixelated; }
+    .preview-label { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+    .row { display: flex; align-items: baseline; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+    .row:last-child { border-bottom: none; }
+    .row-label { font-size: 0.82rem; color: var(--muted); min-width: 150px; }
+    .row-value { font-family: var(--mono); font-size: 0.82rem; }
+    .note { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+    a.back { font-size: 0.82rem; color: var(--accent); text-decoration: none; align-self: flex-start; }
+    a.back:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Canvas favicon animation</h1>
+    <p>Renders a live clock into the favicon via Canvas and a data URL. Tests whether the browser updates the tab icon dynamically.</p>
+  </header>
+
+  <div class="section">
+    <span class="section-title">Controls</span>
+    <div class="card">
+      <div class="controls">
+        <button id="btn-start">Start animation</button>
+        <button id="btn-stop" class="secondary">Stop</button>
+        <button id="btn-reset" class="secondary">Reset to static icon</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="section-title">Preview</span>
+    <div class="card">
+      <div class="preview-row">
+        <canvas id="preview" width="64" height="64"></canvas>
+        <span class="preview-label">Live canvas output (64×64, scaled up for visibility).<br>The favicon is set to a 32×32 version of this.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="section-title">Stats</span>
+    <div class="card">
+      <div class="row"><span class="row-label">Status</span><span class="row-value" id="stat-status">stopped</span></div>
+      <div class="row"><span class="row-label">Frames rendered</span><span class="row-value" id="stat-frames">0</span></div>
+      <div class="row"><span class="row-label">Last update</span><span class="row-value" id="stat-time">—</span></div>
+      <div class="row"><span class="row-label">setInterval supported</span><span class="row-value" id="stat-interval">—</span></div>
+      <div class="row"><span class="row-label">Canvas supported</span><span class="row-value" id="stat-canvas">—</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="section-title">Notes</span>
+    <div class="card">
+      <span class="note">Not all browsers re-render favicon data URLs on every update. Some cache the first value and ignore subsequent changes until the tab loses and regains focus. Watch the tab icon while the animation runs to test your browser's behaviour.</span>
+    </div>
+  </div>
+
+  <a class="back" href="index.html">← Back to index</a>
+
+  <script>
+    const previewCanvas = document.getElementById('preview');
+    const offscreen = document.createElement('canvas');
+    offscreen.width = 32; offscreen.height = 32;
+
+    let intervalId = null;
+    let frames = 0;
+
+    const canvasOk = !!previewCanvas.getContext;
+    document.getElementById('stat-canvas').textContent   = canvasOk ? 'yes' : 'no';
+    document.getElementById('stat-interval').textContent = typeof setInterval === 'function' ? 'yes' : 'no';
+
+    function applyFavicon(dataUrl) {
+      let link = document.querySelector("link[rel~='icon']");
+      if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+      link.type = 'image/png';
+      link.href = dataUrl;
+    }
+
+    function drawClock(ctx, size, t) {
+      const cx = size / 2, cy = size / 2, r = size / 2 - 1;
+      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      ctx.clearRect(0, 0, size, size);
+
+      // Background
+      ctx.fillStyle = isDark ? '#1f2937' : '#ffffff';
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+
+      // Border
+      ctx.strokeStyle = isDark ? '#6b7280' : '#d1d5db';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+
+      const sec  = t.getSeconds() + t.getMilliseconds() / 1000;
+      const min  = t.getMinutes() + sec / 60;
+      const hour = (t.getHours() % 12) + min / 60;
+
+      function hand(angle, length, width, color) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(angle * Math.PI / 180);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -length);
+        ctx.stroke(); ctx.restore();
+      }
+
+      hand(hour * 30,      r * 0.5, size / 12, isDark ? '#f9fafb' : '#111827');
+      hand(min * 6,        r * 0.7, size / 16, isDark ? '#f9fafb' : '#111827');
+      hand(sec * 6,        r * 0.8, size / 24, '#ef4444');
+
+      // Center dot
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath(); ctx.arc(cx, cy, size / 16, 0, Math.PI * 2); ctx.fill();
+    }
+
+    function tick() {
+      const now = new Date();
+      const pCtx = previewCanvas.getContext('2d');
+      drawClock(pCtx, 64, now);
+      const oCtx = offscreen.getContext('2d');
+      drawClock(oCtx, 32, now);
+      applyFavicon(offscreen.toDataURL('image/png'));
+      frames++;
+      document.getElementById('stat-frames').textContent = frames;
+      document.getElementById('stat-time').textContent = now.toLocaleTimeString();
+    }
+
+    document.getElementById('btn-start').onclick = () => {
+      if (intervalId) return;
+      intervalId = setInterval(tick, 1000);
+      tick();
+      document.getElementById('stat-status').textContent = 'running (1 fps)';
+    };
+
+    document.getElementById('btn-stop').onclick = () => {
+      if (!intervalId) return;
+      clearInterval(intervalId); intervalId = null;
+      document.getElementById('stat-status').textContent = 'stopped';
+    };
+
+    document.getElementById('btn-reset').onclick = () => {
+      if (intervalId) { clearInterval(intervalId); intervalId = null; }
+      applyFavicon('icons/favicon_32.png');
+      const ctx = previewCanvas.getContext('2d');
+      ctx.clearRect(0, 0, 64, 64);
+      document.getElementById('stat-status').textContent = 'reset to static icon';
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>prefers-color-scheme favicon</title>
+  <link id="favicon" rel="icon" href="icons/favicon_lightdark.svg" sizes="any" type="image/svg+xml">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f5f5f4; --surface: #ffffff; --border: #e2e0dc;
+      --text: #111827; --muted: #6b7280; --accent: #2563eb; --accent-h: #1d4ed8;
+      --radius: 10px; --mono: "Fira Code", "Cascadia Code", ui-monospace, monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #111827; --surface: #1f2937; --border: #374151; --text: #f9fafb; --muted: #9ca3af; --accent: #3b82f6; --accent-h: #2563eb; }
+    }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 3rem 1rem; gap: 2rem; }
+    header { text-align: center; max-width: 480px; }
+    header h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+    header p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+    .section { width: 100%; max-width: 680px; display: flex; flex-direction: column; gap: 0.75rem; }
+    .section-title { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .status-bar { width: 100%; max-width: 680px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.6rem; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex-shrink: 0; transition: background 0.3s; }
+    .status-dot.light { background: #f59e0b; }
+    .status-dot.dark  { background: #6366f1; }
+    .status-text { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); }
+    .row { display: flex; align-items: baseline; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+    .row:last-child { border-bottom: none; }
+    .row-label { font-size: 0.82rem; color: var(--muted); min-width: 180px; }
+    .row-value { font-family: var(--mono); font-size: 0.82rem; }
+    .note { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+    a.back { font-size: 0.82rem; color: var(--accent); text-decoration: none; align-self: flex-start; }
+    a.back:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>prefers-color-scheme</h1>
+    <p>Tests whether the browser re-renders the SVG favicon when the system theme changes.</p>
+  </header>
+
+  <div class="status-bar">
+    <span class="status-dot" id="dot"></span>
+    <span class="status-text" id="status">Detecting theme…</span>
+  </div>
+
+  <div class="section">
+    <span class="section-title">Current state</span>
+    <div class="card">
+      <div class="row">
+        <span class="row-label">prefers-color-scheme</span>
+        <span class="row-value" id="scheme">—</span>
+      </div>
+      <div class="row">
+        <span class="row-label">matchMedia supported</span>
+        <span class="row-value" id="mm-support">—</span>
+      </div>
+      <div class="row">
+        <span class="row-label">addEventListener supported</span>
+        <span class="row-value" id="mm-events">—</span>
+      </div>
+      <div class="row">
+        <span class="row-label">Favicon href</span>
+        <span class="row-value" id="favicon-href">—</span>
+      </div>
+      <div class="row">
+        <span class="row-label">Last theme change</span>
+        <span class="row-value" id="last-change">—</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="section-title">How to test</span>
+    <div class="card">
+      <span class="note">Switch your OS or browser theme between light and dark while this page is open. If the browser supports live re-rendering of SVG favicons with <code>prefers-color-scheme</code>, the tab icon should update automatically without any JavaScript. The "last theme change" timestamp above confirms the <code>matchMedia</code> event fired.</span>
+    </div>
+  </div>
+
+  <a class="back" href="index.html">← Back to index</a>
+
+  <script>
+    const mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+    const dot    = document.getElementById('dot');
+    const status = document.getElementById('status');
+
+    function update(isDark) {
+      const scheme = isDark ? 'dark' : 'light';
+      document.getElementById('scheme').textContent = scheme;
+      dot.className = 'status-dot ' + scheme;
+      status.textContent = `System theme is currently: ${scheme}`;
+    }
+
+    document.getElementById('mm-support').textContent = mq ? 'yes' : 'no';
+    document.getElementById('mm-events').textContent  = mq && typeof mq.addEventListener === 'function' ? 'yes' : 'no';
+    document.getElementById('favicon-href').textContent = document.getElementById('favicon').href;
+
+    if (mq) {
+      update(mq.matches);
+      if (typeof mq.addEventListener === 'function') {
+        mq.addEventListener('change', e => {
+          update(e.matches);
+          document.getElementById('last-change').textContent = new Date().toLocaleTimeString();
+        });
+      }
+    }
+  </script>
+</body>
+</html>
